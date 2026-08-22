@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="assets/logo.png" width="200" alt="LoomStack logo">
-</p>
-
 <div align="center">
+
+<img src="assets/logo.png" alt="LoomStack logo" width="180">
 
 # LoomStack
 
@@ -58,16 +56,9 @@ LoomStack is a multi-tenant ERP system built for small-to-mid manufacturers runn
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    A[React Frontend] -->|REST / WebSocket| B[NestJS Core ERP]
-    B --> C[(PostgreSQL)]
-    B -->|Internal REST| D[Django Forecasting Service]
-    D --> C
-    B -->|Tool Calling| E[OpenAI API]
-    B -->|Jobs / Cache / Pub-Sub| F[(Redis)]
-    D -->|Read-only role| C
-```
+<p align="center">
+  <img src="assets/architecture.png" alt="LoomStack system architecture diagram" width="100%">
+</p>
 
 **Design principles:**
 - The forecasting service has **read-only** database access — it returns predictions, and NestJS validates and persists them. It never writes to core ERP tables.
