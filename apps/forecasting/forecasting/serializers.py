@@ -9,3 +9,7 @@ class ForecastRequestSerializer(serializers.Serializer):
         choices=['prophet', 'moving_average', 'linear_trend', 'gradient_boosting'],
         default='prophet',
     )
+
+class AnomalyRequestSerializer(serializers.Serializer):
+    tenant_id = serializers.CharField()
+    product_id = serializers.CharField(required=False, allow_blank=True)
