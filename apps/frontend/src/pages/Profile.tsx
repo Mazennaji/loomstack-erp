@@ -20,6 +20,14 @@ function resolveAvatar(url: string | null): string | null {
   return url.startsWith('http') ? url : `${API_BASE}${url}`;
 }
 
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 export default function Profile() {
   const { data: profile, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
@@ -76,9 +84,7 @@ export default function Profile() {
           setNewPassword('');
         },
         onError: (err: any) => {
-          setPwError(
-            err?.response?.data?.message || 'Could not update password.',
-          );
+          setPwError(err?.response?.data?.message || 'Could not update password.');
         },
       },
     );
@@ -93,7 +99,11 @@ export default function Profile() {
     .toUpperCase();
 
   if (isLoading) {
-    return <p className="text-sm text-muted">Loading profile…</p>;
+    return (
+      <div className="flex min-h-64 items-center justify-center">
+        <p className="text-sm text-muted">Loading profile…</p>
+      </div>
+    );
   }
 
   return (
@@ -108,42 +118,91 @@ export default function Profile() {
         </p>
       </div>
 
+      <div className="relative mb-6 overflow-hidden rounded-xl border border-line bg-navy">
+        <div className="absolute inset-0 opacity-[0.06]">
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage:
+                'linear-gradient(var(--color-signal) 1px, transparent 1px), linear-gradient(90deg, var(--color-signal) 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
+            }}
+          />
+        </div>
+        <div className="relative flex items-center gap-5 p-6">
+          <div className="relative">
+            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-surface/20 bg-navy-soft">
+              {displayAvatar ? (
+                <img src={displayAvatar} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-display text-2xl font-600 text-navy">{initials}</span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploadAvatar.isPending}
+              aria-label="Change photo"
+              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-signal text-navy shadow-md transition-transform hover:scale-110 disabled:opacity-50"
+            >
+              {uploadAvatar.isPending ? (
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-navy border-t-transparent" />
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M11 2l3 3-7 7-4 1 1-4 7-7z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                </svg>
+              )}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFile}
+              className="hidden"
+            />
+          </div>
+
+          <div className="min-w-0">
+            <div className="font-display text-xl font-600 tracking-tight text-surface">
+              {profile?.name || 'Unnamed user'}
+            </div>
+            <div className="mt-0.5 font-mono text-[13px] text-surface/60">{profile?.email}</div>
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[11px] text-surface/50">
+              {profile?.role && (
+                <span>
+                  <span className="text-signal">role</span> {profile.role}
+                </span>
+              )}
+              {profile?.tenantId && (
+                <span>
+                  <span className="text-signal">tenant</span> {profile.tenantId.slice(0, 8)}
+                </span>
+              )}
+              {profile?.createdAt && (
+                <span>
+                  <span className="text-signal">since</span> {formatDate(profile.createdAt)}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-3">
-        <section className="overflow-hidden rounded-lg border border-line bg-surface lg:col-span-2">
-          <div className="border-b border-line px-5 py-3">
+        <section className="relative overflow-hidden rounded-xl border border-line bg-surface lg:col-span-2">
+          <span className="absolute inset-x-0 top-0 h-0.5 bg-signal" />
+          <div className="border-b border-line px-6 py-4">
             <h2 className="font-mono text-[11px] font-medium uppercase tracking-wider text-muted">
               Account details
             </h2>
           </div>
-          <form onSubmit={handleSaveProfile} className="space-y-5 p-5">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-line bg-navy-soft">
-                {displayAvatar ? (
-                  <img src={displayAvatar} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="font-display text-lg font-600 text-navy">{initials}</span>
-                )}
-              </div>
-              <div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFile}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploadAvatar.isPending}
-                  className="rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-line/40 disabled:opacity-50"
-                >
-                  {uploadAvatar.isPending ? 'Uploading…' : 'Upload photo'}
-                </button>
-                <p className="mt-1.5 text-xs text-muted">PNG or JPG, up to 5MB.</p>
-              </div>
-            </div>
-
+          <form onSubmit={handleSaveProfile} className="space-y-5 p-6">
             <div>
               <label className={labelClass}>Name</label>
               <input value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
@@ -166,7 +225,7 @@ export default function Profile() {
                 className={fieldClass}
               />
               <p className="mt-1.5 text-xs text-muted">
-                Use a link instead of uploading, if you prefer.
+                Paste a link, or use the camera button on your photo to upload.
               </p>
             </div>
 
@@ -192,13 +251,14 @@ export default function Profile() {
           </form>
         </section>
 
-        <section className="h-fit overflow-hidden rounded-lg border border-line bg-surface">
-          <div className="border-b border-line px-5 py-3">
+        <section className="relative h-fit overflow-hidden rounded-xl border border-line bg-surface">
+          <span className="absolute inset-x-0 top-0 h-0.5 bg-signal" />
+          <div className="border-b border-line px-6 py-4">
             <h2 className="font-mono text-[11px] font-medium uppercase tracking-wider text-muted">
               Change password
             </h2>
           </div>
-          <form onSubmit={handleChangePassword} className="space-y-4 p-5">
+          <form onSubmit={handleChangePassword} className="space-y-4 p-6">
             <div>
               <label className={labelClass}>Current password</label>
               <input
