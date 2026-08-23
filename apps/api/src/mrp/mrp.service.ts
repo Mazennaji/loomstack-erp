@@ -408,4 +408,29 @@ export class MrpService {
       data: { quantity: { decrement: qty } },
     });
   }
+
+    async monthlyHistory(tenantId: string, productId: string) {
+    const product = await this.prisma.product.findFirst({
+      where: { id: productId, tenantId },
+    });
+    if (!product) throw new NotFoundException('Product not found for this tenant');
+
+    const lines = await this.prisma.salesOrderLine.findMany({
+      where: { productId, salesOrder: { tenantId } },
+      select: { quantity: true, dueDate: true },
+      orderBy: { dueDate: 'asc' },
+    });
+
+    const buckets = new Map<string, number>();
+    for (const l of lines) {
+      const key = l.dueDate.toISOString().slice(0, 7);
+      buckets.set(key, (buckets.get(key) ?? 0) + l.quantity);
+    }
+
+    return {
+      productId,
+      monthly: Array.from(buckets.values()),
+      months: Array.from(buckets.keys()),
+    };
+  }
 }
