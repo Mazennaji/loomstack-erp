@@ -4,6 +4,7 @@ import pandas as pd
 
 from .models import SalesOrderLine
 from .forecasters import SIMPLE_FORECASTERS
+from .ml.gbr_forecaster import train_and_forecast as gbr_forecast
 
 
 def get_historical_demand(tenant_id: str, product_id: str) -> pd.DataFrame:
@@ -69,6 +70,9 @@ def _forecast_simple(df, periods_weeks, method):
 
 
 def forecast_demand(tenant_id: str, product_id: str, periods_weeks: int = 8, method: str = 'prophet'):
+    if method == 'gradient_boosting':
+        return gbr_forecast(tenant_id, product_id, periods_weeks)
+
     df = get_historical_demand(tenant_id, product_id)
 
     if df.empty or len(df) < 3:
