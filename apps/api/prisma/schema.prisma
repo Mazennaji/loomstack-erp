@@ -50,12 +50,17 @@ model Product {
   id        String   @id @default(uuid())
   sku       String
   name      String
+  unitCost  Decimal  @default(0) @db.Decimal(12, 4)
   createdAt DateTime @default(now())
 
   tenant   Tenant @relation(fields: [tenantId], references: [id])
   tenantId String
 
   stockItems StockItem[]
+
+  bomLines       BomLine[]    @relation("ParentProduct")
+  usedInBomLines BomLine[]    @relation("ComponentProduct")
+  bomVersions    BomVersion[]
 
   @@unique([tenantId, sku])
 }
@@ -73,24 +78,6 @@ model StockItem {
   @@unique([productId, warehouseId])
 }
 
-model Product {
-  id        String   @id @default(uuid())
-  sku       String
-  name      String
-  unitCost  Decimal  @default(0) @db.Decimal(12, 4)
-  createdAt DateTime @default(now())
-
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
-  tenantId String
-
-  stockItems StockItem[]
-  bomVersions BomVersion[]
-
-  bomLines      BomLine[] @relation("ParentProduct")
-  usedInBomLines BomLine[] @relation("ComponentProduct")
-
-  @@unique([tenantId, sku])
-}
 
 model BomVersion {
   id          String   @id @default(uuid())
