@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
 import logo from '../assets/logo.png';
 
 export function Register() {
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
@@ -12,13 +12,15 @@ export function Register() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  if (isAuthenticated) return <Navigate to="/app" replace />;
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       await register({ companyName, email, password });
-      navigate('/');
+      navigate('/app');
     } catch {
       setError('Could not create your workspace. That email may already be in use.');
     } finally {

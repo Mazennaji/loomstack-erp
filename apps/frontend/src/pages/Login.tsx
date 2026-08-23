@@ -1,15 +1,17 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
 import logo from '@/assets/logo.png';
 
 export function Login() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (isAuthenticated) return <Navigate to="/app" replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -17,7 +19,7 @@ export function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/app');
     } catch {
       setError('Those credentials did not match. Check your email and password.');
     } finally {
@@ -40,11 +42,7 @@ export function Login() {
         </div>
         <div className="relative flex h-full flex-col justify-between p-12">
           <div className="flex items-center gap-2.5">
-            <img
-              src={logo}
-              alt="LoomStack"
-              className="h-8 w-8 rounded bg-surface p-0.5"
-            />
+            <img src={logo} alt="LoomStack" className="h-8 w-8 rounded bg-surface p-0.5" />
             <span className="font-display text-xl font-700 tracking-tight text-surface">
               LoomStack
             </span>
@@ -119,6 +117,13 @@ export function Login() {
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
+          <p className="mt-6 text-center text-sm text-muted">
+            No account yet?{' '}
+            <Link to="/register" className="font-medium text-navy hover:text-signal">
+              Create one
+            </Link>
+          </p>
         </div>
       </div>
     </div>
