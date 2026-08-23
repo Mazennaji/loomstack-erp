@@ -85,8 +85,14 @@ export class CopilotService {
     messages.push(responseMessage);
 
     for (const toolCall of toolCalls) {
+      if (toolCall.type !== 'function') continue;
+
       const args = JSON.parse(toolCall.function.arguments || '{}');
-      const result = await this.executeTool(toolCall.function.name, args, tenantId);
+      const result = await this.executeTool(
+        toolCall.function.name,
+        args,
+        tenantId,
+      );
 
       messages.push({
         role: 'tool',
