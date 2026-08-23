@@ -30,8 +30,8 @@ DATABASES = {
         'NAME': os.environ.get('POSTGRES_DB', 'loomstack'),
         'USER': os.environ.get('POSTGRES_USER', 'loomstack'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'loomstack_dev_password'),
-        'HOST': os.environ.get('DB_HOST', 'postgres'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5433'),
         'OPTIONS': {
             'options': '-c default_transaction_read_only=on'
         },
