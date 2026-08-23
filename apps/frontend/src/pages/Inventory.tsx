@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { useProducts, useCreateProduct } from '../hooks/useProducts';
-import { useWarehouses, useCreateWarehouse } from '../hooks/useWarehouses';
+import { useProducts } from '../hooks/useProducts';
+import { useWarehouses } from '../hooks/useWarehouses';
 import { useStockLevels, useAdjustStock } from '../hooks/useStock';
 import Modal from '../components/Modal';
 
@@ -10,53 +10,15 @@ const labelClass =
   'mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-muted';
 
 export default function Inventory() {
-  const { data: products, isLoading: productsLoading } = useProducts();
-  const { data: warehouses, isLoading: warehousesLoading } = useWarehouses();
+  const { data: products } = useProducts();
+  const { data: warehouses } = useWarehouses();
   const { data: stockLevels, isLoading: stockLoading } = useStockLevels();
-
-  const createProduct = useCreateProduct();
-  const createWarehouse = useCreateWarehouse();
   const adjustStock = useAdjustStock();
 
-  const [productModalOpen, setProductModalOpen] = useState(false);
-  const [warehouseModalOpen, setWarehouseModalOpen] = useState(false);
   const [adjustModalOpen, setAdjustModalOpen] = useState(false);
-
-  const [sku, setSku] = useState('');
-  const [name, setName] = useState('');
-  const [whName, setWhName] = useState('');
-  const [whLocation, setWhLocation] = useState('');
   const [adjProductId, setAdjProductId] = useState('');
   const [adjWarehouseId, setAdjWarehouseId] = useState('');
   const [adjQty, setAdjQty] = useState(0);
-
-  function handleCreateProduct(e: FormEvent) {
-    e.preventDefault();
-    createProduct.mutate(
-      { sku, name },
-      {
-        onSuccess: () => {
-          setSku('');
-          setName('');
-          setProductModalOpen(false);
-        },
-      },
-    );
-  }
-
-  function handleCreateWarehouse(e: FormEvent) {
-    e.preventDefault();
-    createWarehouse.mutate(
-      { name: whName, location: whLocation },
-      {
-        onSuccess: () => {
-          setWhName('');
-          setWhLocation('');
-          setWarehouseModalOpen(false);
-        },
-      },
-    );
-  }
 
   function handleAdjustStock(e: FormEvent) {
     e.preventDefault();
@@ -71,41 +33,30 @@ export default function Inventory() {
     );
   }
 
+  const noPrereqs = !products?.length || !warehouses?.length;
+
   return (
     <div>
       <div className="mb-8 flex items-end justify-between">
         <div>
           <div className="flex items-baseline gap-3">
-            <span className="font-mono text-xs text-signal">02</span>
+            <span className="font-mono text-xs text-signal">04</span>
             <h1 className="font-display text-2xl font-600 tracking-tight">Inventory</h1>
           </div>
           <p className="mt-1 pl-8 text-sm text-muted">
-            Products, warehouses, and live stock across every location.
+            Live stock across every location, net of reservations.
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setProductModalOpen(true)}
-            className="rounded-md border border-line bg-surface px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-line/40"
-          >
-            New product
-          </button>
-          <button
-            onClick={() => setWarehouseModalOpen(true)}
-            className="rounded-md border border-line bg-surface px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-line/40"
-          >
-            New warehouse
-          </button>
-          <button
-            onClick={() => setAdjustModalOpen(true)}
-            className="rounded-md bg-navy px-3.5 py-2 text-sm font-medium text-surface transition-colors hover:bg-navy/90"
-          >
-            Adjust stock
-          </button>
-        </div>
+        <button
+          onClick={() => setAdjustModalOpen(true)}
+          disabled={noPrereqs}
+          className="rounded-md bg-navy px-3.5 py-2 text-sm font-medium text-surface transition-colors hover:bg-navy/90 disabled:opacity-50"
+        >
+          Adjust stock
+        </button>
       </div>
 
-      <section className="mb-6 overflow-hidden rounded-lg border border-line bg-surface">
+      <section className="overflow-hidden rounded-lg border border-line bg-surface">
         <div className="flex items-center justify-between border-b border-line px-5 py-3">
           <h2 className="font-mono text-[11px] font-medium uppercase tracking-wider text-muted">
             Stock levels
@@ -116,8 +67,9 @@ export default function Inventory() {
             </span>
           )}
         </div>
+
         {stockLoading ? (
-          <p className="px-5 py-8 text-center text-sm text-muted">Loading stock…</p>
+          <p className="px-5 py-10 text-center text-sm text-muted">Loading stock…</p>
         ) : stockLevels && stockLevels.length > 0 ? (
           <table className="w-full text-sm">
             <thead>
@@ -169,134 +121,23 @@ export default function Inventory() {
             </tbody>
           </table>
         ) : (
-          <div className="px-5 py-10 text-center">
+          <div className="px-5 py-12 text-center">
             <p className="text-sm text-muted">
-              No stock yet. Add a product and a warehouse, then adjust stock to set opening levels.
+              {noPrereqs
+                ? 'Add a product and a warehouse first, then adjust stock to set opening levels.'
+                : 'No stock yet. Adjust stock to set opening levels.'}
             </p>
+            {!noPrereqs && (
+              <button
+                onClick={() => setAdjustModalOpen(true)}
+                className="mt-4 rounded-md bg-navy px-3.5 py-2 text-sm font-medium text-surface transition-colors hover:bg-navy/90"
+              >
+                Adjust stock
+              </button>
+            )}
           </div>
         )}
       </section>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="overflow-hidden rounded-lg border border-line bg-surface">
-          <div className="flex items-center justify-between border-b border-line px-5 py-3">
-            <h2 className="font-mono text-[11px] font-medium uppercase tracking-wider text-muted">
-              Products
-            </h2>
-            {products && (
-              <span className="font-mono text-[11px] text-muted">{products.length}</span>
-            )}
-          </div>
-          {productsLoading ? (
-            <p className="px-5 py-8 text-center text-sm text-muted">Loading…</p>
-          ) : products && products.length > 0 ? (
-            <ul className="divide-y divide-line">
-              {products.map((p) => (
-                <li key={p.id} className="flex items-center justify-between px-5 py-3">
-                  <span className="text-sm font-medium">{p.name}</span>
-                  <span className="font-mono text-[13px] text-navy">{p.sku}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="px-5 py-8 text-center text-sm text-muted">No products yet.</p>
-          )}
-        </section>
-
-        <section className="overflow-hidden rounded-lg border border-line bg-surface">
-          <div className="flex items-center justify-between border-b border-line px-5 py-3">
-            <h2 className="font-mono text-[11px] font-medium uppercase tracking-wider text-muted">
-              Warehouses
-            </h2>
-            {warehouses && (
-              <span className="font-mono text-[11px] text-muted">{warehouses.length}</span>
-            )}
-          </div>
-          {warehousesLoading ? (
-            <p className="px-5 py-8 text-center text-sm text-muted">Loading…</p>
-          ) : warehouses && warehouses.length > 0 ? (
-            <ul className="divide-y divide-line">
-              {warehouses.map((w) => (
-                <li key={w.id} className="flex items-center justify-between px-5 py-3">
-                  <span className="text-sm font-medium">{w.name}</span>
-                  <span className="text-sm text-muted">{w.location || '—'}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="px-5 py-8 text-center text-sm text-muted">No warehouses yet.</p>
-          )}
-        </section>
-      </div>
-
-      <Modal
-        open={productModalOpen}
-        onClose={() => setProductModalOpen(false)}
-        title="New product"
-        description="Add a finished good, assembly, or raw material."
-      >
-        <form onSubmit={handleCreateProduct} className="space-y-4">
-          <div>
-            <label className={labelClass}>SKU</label>
-            <input
-              value={sku}
-              onChange={(e) => setSku(e.target.value)}
-              required
-              className={fieldClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Name</label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className={fieldClass}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={createProduct.isPending}
-            className="w-full rounded-md bg-navy py-2.5 text-sm font-medium text-surface transition-colors hover:bg-navy/90 disabled:opacity-50"
-          >
-            {createProduct.isPending ? 'Creating…' : 'Create product'}
-          </button>
-        </form>
-      </Modal>
-
-      <Modal
-        open={warehouseModalOpen}
-        onClose={() => setWarehouseModalOpen(false)}
-        title="New warehouse"
-        description="Stock is tracked per warehouse."
-      >
-        <form onSubmit={handleCreateWarehouse} className="space-y-4">
-          <div>
-            <label className={labelClass}>Name</label>
-            <input
-              value={whName}
-              onChange={(e) => setWhName(e.target.value)}
-              required
-              className={fieldClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Location</label>
-            <input
-              value={whLocation}
-              onChange={(e) => setWhLocation(e.target.value)}
-              className={fieldClass}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={createWarehouse.isPending}
-            className="w-full rounded-md bg-navy py-2.5 text-sm font-medium text-surface transition-colors hover:bg-navy/90 disabled:opacity-50"
-          >
-            {createWarehouse.isPending ? 'Creating…' : 'Create warehouse'}
-          </button>
-        </form>
-      </Modal>
 
       <Modal
         open={adjustModalOpen}
@@ -346,12 +187,16 @@ export default function Inventory() {
               value={adjQty}
               onChange={(e) => setAdjQty(Number(e.target.value))}
               required
-              className={fieldClass}
+              className={`font-mono ${fieldClass}`}
             />
-            <p className="mt-1.5 text-xs text-muted">
-              Use a negative number to remove units.
-            </p>
+            <p className="mt-1.5 text-xs text-muted">Use a negative number to remove units.</p>
           </div>
+
+          {adjustStock.isError && (
+            <div className="rounded-md bg-draft-soft px-3 py-2 text-sm text-draft">
+              Could not adjust stock.
+            </div>
+          )}
 
           <button
             type="submit"
