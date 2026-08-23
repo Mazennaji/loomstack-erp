@@ -6,6 +6,6 @@ class ForecastRequestSerializer(serializers.Serializer):
     product_id = serializers.CharField()
     periods_weeks = serializers.IntegerField(default=8, min_value=1, max_value=52)
     method = serializers.ChoiceField(
-        choices=['prophet', 'moving_average', 'linear_trend'],
+        choices=['prophet', 'moving_average', 'linear_trend', 'gradient_boosting'],
         default='prophet',
     )
