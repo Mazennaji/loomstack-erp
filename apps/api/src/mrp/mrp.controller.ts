@@ -5,6 +5,7 @@ import { RunMrpDto } from './dto/run-mrp.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
+import { ExecuteOrderDto } from './dto/execute-order.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('mrp')
@@ -44,5 +45,33 @@ export class MrpController {
   @Post('runs/:id/cancel')
   cancelRun(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.mrpService.cancelRun(user.tenantId, id);
+  }
+
+    @Post('purchase-orders/:id/release')
+  releasePurchaseOrder(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.mrpService.releasePurchaseOrder(user.tenantId, id);
+  }
+
+  @Post('production-orders/:id/release')
+  releaseProductionOrder(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.mrpService.releaseProductionOrder(user.tenantId, id);
+  }
+
+  @Post('purchase-orders/:id/receive')
+  receivePurchaseOrder(
+    @Param('id') id: string,
+    @Body() dto: ExecuteOrderDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.mrpService.receivePurchaseOrder(user.tenantId, id, dto);
+  }
+
+  @Post('production-orders/:id/complete')
+  completeProductionOrder(
+    @Param('id') id: string,
+    @Body() dto: ExecuteOrderDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.mrpService.completeProductionOrder(user.tenantId, id, dto);
   }
 }
