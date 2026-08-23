@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { BomController } from './bom.controller';
 import { BomService } from './bom.service';
+import { BomController } from './bom.controller';
 
 @Module({
   controllers: [BomController],
-  providers: [BomService]
+  providers: [BomService],
 })
 export class BomModule {}
