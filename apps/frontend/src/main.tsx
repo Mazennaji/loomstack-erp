@@ -13,6 +13,7 @@ import Products from '@/pages/Products';
 import Warehouses from '@/pages/Warehouses';
 import Inventory from '@/pages/Inventory';
 import Bom from '@/pages/Bom';
+import Profile from '@/pages/Profile';
 import Mrp from '@/pages/Mrp';
 import './index.css';
 
@@ -41,6 +42,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="mrp" element={<Mrp />} />
               </Route>
             </Route>
+            <Route path="profile" element={<Profile />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
