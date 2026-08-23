@@ -9,8 +9,11 @@ import { Landing } from '@/pages/Landing';
 import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
 import { Dashboard } from '@/pages/Dashboard';
-import { Products } from '@/pages/Products';
-import { Mrp } from '@/pages/Mrp';
+import Products from '@/pages/Products';
+import Warehouses from '@/pages/Warehouses';
+import Inventory from '@/pages/Inventory';
+import Bom from '@/pages/Bom';
+import Mrp from '@/pages/Mrp';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -32,6 +35,9 @@ createRoot(document.getElementById('root')!).render(
               <Route element={<Layout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="products" element={<Products />} />
+                <Route path="warehouses" element={<Warehouses />} />
+                <Route path="inventory" element={<Inventory />} />
+                <Route path="bom" element={<Bom />} />
                 <Route path="mrp" element={<Mrp />} />
               </Route>
             </Route>
