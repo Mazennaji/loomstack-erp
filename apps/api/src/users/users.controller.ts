@@ -63,7 +63,6 @@ export class UsersController {
     @CurrentUser() user: JwtPayload,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const url = `/uploads/${file.filename}`;
-    return this.usersService.setAvatar(user.sub, url);
+    return this.usersService.setAvatar(user.sub, `/uploads/${file.filename}`);
   }
 }
