@@ -4,6 +4,7 @@ import { MrpController } from './mrp.controller';
 
 @Module({
   controllers: [MrpController],
-  providers: [MrpService],
+  providers: [MrpService, ForecastingClientService],
+  exports: [MrpService, ForecastingClientService],
 })
 export class MrpModule {}
