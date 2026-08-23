@@ -11,7 +11,9 @@ interface LineDraft {
 }
 
 const fieldClass =
-  'rounded-md border border-line bg-surface px-3 py-2 text-sm outline-none transition-colors focus:border-signal focus:ring-2 focus:ring-signal-soft';
+  'w-full rounded-md border border-line bg-surface px-3 py-2 text-sm outline-none transition-colors focus:border-signal focus:ring-2 focus:ring-signal-soft';
+const labelClass =
+  'mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-muted';
 
 export default function Mrp() {
   const { data: products } = useProducts();
@@ -168,37 +170,42 @@ export default function Mrp() {
         description="Demand from open orders drives the next MRP run."
       >
         <form onSubmit={handleCreateOrder}>
-          <label className="mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-wider text-muted">
-            Customer
-          </label>
-          <input
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            required
-            className={`mb-5 w-full ${fieldClass}`}
-          />
-
-          <div className="mb-2 flex items-center gap-2 px-1">
-            <span className="flex-1 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-              Product
-            </span>
-            <span className="w-20 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-              Qty
-            </span>
-            <span className="w-40 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-              Due
-            </span>
-            <span className="w-6" />
+          <div className="mb-5">
+            <label className={labelClass}>Customer</label>
+            <input
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              required
+              className={fieldClass}
+            />
           </div>
 
-          <div className="space-y-2">
+          <label className={labelClass}>Order lines</label>
+          <div className="space-y-3">
             {lines.map((line, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={i} className="rounded-lg border border-line bg-paper/50 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
+                    Line {i + 1}
+                  </span>
+                  {lines.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeLine(i)}
+                      aria-label="Remove line"
+                      className="flex h-6 w-6 items-center justify-center rounded text-muted transition-colors hover:bg-draft-soft hover:text-draft"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
                 <select
                   value={line.productId}
                   onChange={(e) => updateLine(i, 'productId', e.target.value)}
                   required
-                  className={`flex-1 ${fieldClass}`}
+                  className={`mb-2 ${fieldClass}`}
                 >
                   <option value="">Select product</option>
                   {products?.map((p) => (
@@ -207,31 +214,28 @@ export default function Mrp() {
                     </option>
                   ))}
                 </select>
-                <input
-                  type="number"
-                  min="1"
-                  value={line.quantity}
-                  onChange={(e) => updateLine(i, 'quantity', Number(e.target.value))}
-                  required
-                  className={`w-20 font-mono ${fieldClass}`}
-                />
-                <input
-                  type="date"
-                  value={line.dueDate}
-                  onChange={(e) => updateLine(i, 'dueDate', e.target.value)}
-                  required
-                  className={`w-40 font-mono ${fieldClass}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeLine(i)}
-                  aria-label="Remove line"
-                  className="flex h-8 w-6 items-center justify-center rounded text-muted transition-colors hover:bg-draft-soft hover:text-draft"
-                >
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
+                <div className="flex gap-2">
+                  <div className="w-24">
+                    <input
+                      type="number"
+                      min="1"
+                      value={line.quantity}
+                      onChange={(e) => updateLine(i, 'quantity', Number(e.target.value))}
+                      required
+                      placeholder="Qty"
+                      className={`font-mono ${fieldClass}`}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="date"
+                      value={line.dueDate}
+                      onChange={(e) => updateLine(i, 'dueDate', e.target.value)}
+                      required
+                      className={`font-mono ${fieldClass}`}
+                    />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
