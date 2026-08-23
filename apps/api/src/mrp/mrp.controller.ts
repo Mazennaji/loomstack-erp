@@ -4,7 +4,7 @@ import { CreateSalesOrderDto } from './dto/create-sales-order.dto';
 import { RunMrpDto } from './dto/run-mrp.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtPayload } from '../auth/strategies/jwt.strategy';
+import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 
 @UseGuards(JwtAuthGuard)
 @Controller('mrp')

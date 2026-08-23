@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBomVersionDto } from './dto/create-bom-version.dto';
 
-interface CostNode {
+export interface CostNode {
   productId: string;
   sku: string;
   name: string;
