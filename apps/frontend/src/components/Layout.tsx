@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
 import logo from '../assets/logo.png';
+import CopilotPanel from './CopilotPanel';
 
 const navItems = [
   { to: '/app', label: 'Dashboard', index: '01' },
@@ -76,6 +77,7 @@ export function Layout() {
       <main className="mx-auto max-w-6xl px-6 py-10">
         <Outlet />
       </main>
+      <CopilotPanel />
     </div>
   );
 }
