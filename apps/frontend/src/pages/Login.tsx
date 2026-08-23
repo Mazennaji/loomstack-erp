@@ -1,24 +1,40 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuthStore } from '@/store/authStore';
+import { api } from '@/lib/api';
 import logo from '@/assets/logo.png';
 
+function decodeToken(token: string) {
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  return {
+    sub: payload.sub,
+    email: payload.email,
+    tenantId: payload.tenantId,
+    role: payload.role,
+  };
+}
+
 export function Login() {
-  const { login, isAuthenticated } = useAuth();
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  if (isAuthenticated) return <Navigate to="/app" replace />;
+  if (token) return <Navigate to="/app" replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
+      const res = await api.post('/auth/login', { email, password });
+      const newToken =
+        res.data.access_token ?? res.data.accessToken ?? res.data.token;
+      if (!newToken) throw new Error('No token returned');
+      setAuth(newToken, decodeToken(newToken));
       navigate('/app');
     } catch {
       setError('Those credentials did not match. Check your email and password.');
