@@ -2,10 +2,8 @@ export function Mrp() {
   return (
     <div>
       <div className="flex items-baseline gap-3">
-        <span className="font-mono text-xs text-muted">03</span>
-        <h1 className="font-display text-2xl font-600 tracking-tight">
-          Material planning
-        </h1>
+        <span className="font-mono text-xs text-signal">03</span>
+        <h1 className="font-display text-2xl font-600 tracking-tight">Material planning</h1>
       </div>
       <p className="mt-1 pl-8 text-sm text-muted">
         Run demand against your BOMs and stock to get purchase and production suggestions.

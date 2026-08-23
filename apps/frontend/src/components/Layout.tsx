@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
+import logo from '../assets/logo.png';
 
 const navItems = [
   { to: '/', label: 'Dashboard', index: '01' },
@@ -16,10 +17,9 @@ export function Layout() {
       <header className="sticky top-0 z-10 border-b border-line bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-10">
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-lg font-700 tracking-tight">
-                LoomStack
-              </span>
+            <div className="flex items-center gap-2.5">
+              <img src={logo} alt="LoomStack" className="h-7 w-7" />
+              <span className="font-display text-lg font-700 tracking-tight">LoomStack</span>
               <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted">
                 ERP
               </span>
@@ -32,21 +32,22 @@ export function Layout() {
                     key={item.to}
                     to={item.to}
                     className={
-                      'group flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ' +
-                      (active
-                        ? 'bg-ink text-surface'
-                        : 'text-muted hover:bg-line/50 hover:text-ink')
+                      'group relative flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ' +
+                      (active ? 'text-ink' : 'text-muted hover:bg-line/50 hover:text-ink')
                     }
                   >
                     <span
                       className={
                         'font-mono text-[10px] ' +
-                        (active ? 'text-surface/60' : 'text-muted/50')
+                        (active ? 'text-signal' : 'text-muted/50')
                       }
                     >
                       {item.index}
                     </span>
                     {item.label}
+                    {active && (
+                      <span className="absolute inset-x-2 -bottom-[13px] h-0.5 bg-signal" />
+                    )}
                   </Link>
                 );
               })}

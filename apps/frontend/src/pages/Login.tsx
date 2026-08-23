@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
+import logo from '@/assets/logo.png';
 
 export function Login() {
   const { login } = useAuth();
@@ -26,19 +27,24 @@ export function Login() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-ink lg:block">
-        <div className="absolute inset-0 opacity-[0.15]">
+      <div className="relative hidden overflow-hidden bg-navy lg:block">
+        <div className="absolute inset-0 opacity-[0.08]">
           <div
             className="h-full w-full"
             style={{
               backgroundImage:
-                'linear-gradient(var(--color-surface) 1px, transparent 1px), linear-gradient(90deg, var(--color-surface) 1px, transparent 1px)',
+                'linear-gradient(var(--color-signal) 1px, transparent 1px), linear-gradient(90deg, var(--color-signal) 1px, transparent 1px)',
               backgroundSize: '40px 40px',
             }}
           />
         </div>
         <div className="relative flex h-full flex-col justify-between p-12">
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-2.5">
+            <img
+              src={logo}
+              alt="LoomStack"
+              className="h-8 w-8 rounded bg-surface p-0.5"
+            />
             <span className="font-display text-xl font-700 tracking-tight text-surface">
               LoomStack
             </span>
@@ -52,15 +58,15 @@ export function Login() {
             </p>
             <div className="mt-8 flex gap-8 font-mono text-xs text-surface/50">
               <div>
-                <div className="text-surface">BOM</div>
+                <div className="text-signal">BOM</div>
                 <div>multi-level costing</div>
               </div>
               <div>
-                <div className="text-surface">MRP</div>
+                <div className="text-signal">MRP</div>
                 <div>demand explosion</div>
               </div>
               <div>
-                <div className="text-surface">WIP</div>
+                <div className="text-signal">WIP</div>
                 <div>order execution</div>
               </div>
             </div>
@@ -70,7 +76,8 @@ export function Login() {
 
       <div className="flex items-center justify-center bg-paper px-6 py-12">
         <div className="w-full max-w-sm">
-          <div className="mb-8 lg:hidden">
+          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+            <img src={logo} alt="LoomStack" className="h-7 w-7" />
             <span className="font-display text-xl font-700 tracking-tight">LoomStack</span>
           </div>
           <h1 className="font-display text-2xl font-600 tracking-tight">Sign in</h1>
@@ -107,7 +114,7 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-md bg-signal py-2.5 text-sm font-medium text-surface transition-colors hover:bg-signal/90 disabled:opacity-50"
+              className="w-full rounded-md bg-navy py-2.5 text-sm font-medium text-surface transition-colors hover:bg-navy/90 disabled:opacity-50"
             >
               {loading ? 'Signing in…' : 'Sign in'}
             </button>

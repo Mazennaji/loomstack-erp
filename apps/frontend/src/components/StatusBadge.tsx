@@ -1,5 +1,3 @@
-type Status = string;
-
 const styles: Record<string, { fg: string; bg: string }> = {
   DRAFT: { fg: 'text-draft', bg: 'bg-draft-soft' },
   APPLIED: { fg: 'text-applied', bg: 'bg-applied-soft' },
@@ -10,7 +8,7 @@ const styles: Record<string, { fg: string; bg: string }> = {
   OPEN: { fg: 'text-done', bg: 'bg-done-soft' },
 };
 
-export function StatusBadge({ status }: { status: Status }) {
+export function StatusBadge({ status }: { status: string }) {
   const s = styles[status] ?? { fg: 'text-muted', bg: 'bg-cancel-soft' };
   return (
     <span
