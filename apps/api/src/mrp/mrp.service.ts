@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException, ConflictException }
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSalesOrderDto } from './dto/create-sales-order.dto';
 import { RunMrpDto } from './dto/run-mrp.dto';
+import { ExecuteOrderDto } from './dto/execute-order.dto';
 
 interface Suggestion {
   productId: string;
@@ -267,6 +268,144 @@ export class MrpService {
         data: { status: 'DRAFT' },
         include: { suggestions: { include: { product: true } } },
       });
+    });
+  }
+
+    async releasePurchaseOrder(tenantId: string, orderId: string) {
+    return this.transitionOrder(tenantId, orderId, 'purchase', 'PLANNED', 'RELEASED');
+  }
+
+  async releaseProductionOrder(tenantId: string, orderId: string) {
+    return this.transitionOrder(tenantId, orderId, 'production', 'PLANNED', 'RELEASED');
+  }
+
+  private async transitionOrder(
+    tenantId: string,
+    orderId: string,
+    kind: 'purchase' | 'production',
+    from: string,
+    to: string,
+  ) {
+    const model = kind === 'purchase' ? this.prisma.purchaseOrder : this.prisma.productionOrder;
+
+    const order = await (model as any).findFirst({ where: { id: orderId, tenantId } });
+    if (!order) throw new NotFoundException(`${kind} order not found for this tenant`);
+
+    if (order.status !== from) {
+      throw new ConflictException(
+        `Cannot move ${kind} order from ${order.status} to ${to}; expected ${from}`,
+      );
+    }
+
+    return (model as any).update({ where: { id: orderId }, data: { status: to } });
+  }
+
+  async receivePurchaseOrder(tenantId: string, orderId: string, dto: ExecuteOrderDto) {
+    const order = await this.prisma.purchaseOrder.findFirst({
+      where: { id: orderId, tenantId },
+    });
+    if (!order) throw new NotFoundException('Purchase order not found for this tenant');
+
+    if (order.status !== 'RELEASED') {
+      throw new ConflictException(
+        `Cannot receive a purchase order with status ${order.status}; release it first`,
+      );
+    }
+
+    const warehouse = await this.prisma.warehouse.findFirst({
+      where: { id: dto.warehouseId, tenantId },
+    });
+    if (!warehouse) throw new BadRequestException('Warehouse not found for this tenant');
+
+    return this.prisma.$transaction(async (tx) => {
+      await this.addStock(tx, order.productId, dto.warehouseId, order.quantity);
+
+      return tx.purchaseOrder.update({
+        where: { id: order.id },
+        data: { status: 'COMPLETED' },
+        include: { product: true },
+      });
+    });
+  }
+
+  async completeProductionOrder(tenantId: string, orderId: string, dto: ExecuteOrderDto) {
+    const order = await this.prisma.productionOrder.findFirst({
+      where: { id: orderId, tenantId },
+    });
+    if (!order) throw new NotFoundException('Production order not found for this tenant');
+
+    if (order.status !== 'RELEASED') {
+      throw new ConflictException(
+        `Cannot complete a production order with status ${order.status}; release it first`,
+      );
+    }
+
+    const warehouse = await this.prisma.warehouse.findFirst({
+      where: { id: dto.warehouseId, tenantId },
+    });
+    if (!warehouse) throw new BadRequestException('Warehouse not found for this tenant');
+
+    const activeVersion = await this.prisma.bomVersion.findFirst({
+      where: { productId: order.productId, isActive: true },
+      include: { lines: true },
+    });
+    if (!activeVersion || activeVersion.lines.length === 0) {
+      throw new BadRequestException('Product has no active BOM to produce from');
+    }
+
+    const shortages: string[] = [];
+    for (const line of activeVersion.lines) {
+      const required = Number(line.quantity) * order.quantity;
+      const item = await this.prisma.stockItem.findUnique({
+        where: {
+          productId_warehouseId: {
+            productId: line.componentProductId,
+            warehouseId: dto.warehouseId,
+          },
+        },
+      });
+      const available = item ? item.quantity - item.reserved : 0;
+      if (available < required) {
+        shortages.push(
+          `component ${line.componentProductId}: need ${required}, have ${available}`,
+        );
+      }
+    }
+
+    if (shortages.length > 0) {
+      throw new ConflictException(
+        `Insufficient components in warehouse: ${shortages.join('; ')}`,
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      for (const line of activeVersion.lines) {
+        const required = Number(line.quantity) * order.quantity;
+        await this.deductStock(tx, line.componentProductId, dto.warehouseId, required);
+      }
+
+      await this.addStock(tx, order.productId, dto.warehouseId, order.quantity);
+
+      return tx.productionOrder.update({
+        where: { id: order.id },
+        data: { status: 'COMPLETED' },
+        include: { product: true },
+      });
+    });
+  }
+
+  private async addStock(tx: any, productId: string, warehouseId: string, qty: number) {
+    await tx.stockItem.upsert({
+      where: { productId_warehouseId: { productId, warehouseId } },
+      create: { productId, warehouseId, quantity: qty, reserved: 0 },
+      update: { quantity: { increment: qty } },
+    });
+  }
+
+  private async deductStock(tx: any, productId: string, warehouseId: string, qty: number) {
+    await tx.stockItem.update({
+      where: { productId_warehouseId: { productId, warehouseId } },
+      data: { quantity: { decrement: qty } },
     });
   }
 }
