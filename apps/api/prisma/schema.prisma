@@ -34,6 +34,9 @@ model User {
 
   tenant   Tenant @relation(fields: [tenantId], references: [id])
   tenantId String
+
+  name      String?
+  avatarUrl String?
 }
 
 enum Role {
