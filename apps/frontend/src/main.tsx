@@ -13,8 +13,9 @@ import Products from '@/pages/Products';
 import Warehouses from '@/pages/Warehouses';
 import Inventory from '@/pages/Inventory';
 import Bom from '@/pages/Bom';
-import Profile from '@/pages/Profile';
 import Mrp from '@/pages/Mrp';
+import Anomalies from '@/pages/Anomalies';
+import Profile from '@/pages/Profile';
 import './index.css';
 
 const queryClient = new QueryClient({
@@ -40,9 +41,10 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="inventory" element={<Inventory />} />
                 <Route path="bom" element={<Bom />} />
                 <Route path="mrp" element={<Mrp />} />
+                <Route path="anomalies" element={<Anomalies />} />
+                <Route path="profile" element={<Profile />} />
               </Route>
             </Route>
-            <Route path="/profile" element={<Profile />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

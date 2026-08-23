@@ -23,6 +23,10 @@ model Tenant {
 
   purchaseOrders   PurchaseOrder[]
   productionOrders ProductionOrder[]
+
+  machines          Machine[]
+  machineUsage      MachineUsage[]
+  maintenanceEvents MaintenanceEvent[]
 }
 
 model User {
@@ -226,6 +230,59 @@ model ProductionOrder {
 
   product   Product @relation(fields: [productId], references: [id])
   productId String
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+}
+
+
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  INSPECTION
+}
+
+model Machine {
+  id                String   @id @default(uuid())
+  name             String
+  code             String
+  status           String   @default("OPERATIONAL")
+  maintenanceIntervalHours Int @default(500)
+  createdAt        DateTime @default(now())
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+
+  usageLogs        MachineUsage[]
+  maintenanceEvents MaintenanceEvent[]
+
+  @@unique([tenantId, code])
+}
+
+model MachineUsage {
+  id        String   @id @default(uuid())
+  date      DateTime
+  hoursRun  Float
+  cycles    Int      @default(0)
+
+  machine   Machine @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  machineId String
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+}
+
+model MaintenanceEvent {
+  id          String          @id @default(uuid())
+  type        MaintenanceType
+  date        DateTime
+  hoursAtService Float
+  notes       String?
+  createdAt   DateTime        @default(now())
+
+  machine   Machine @relation(fields: [machineId], references: [id], onDelete: Cascade)
+  machineId String
 
   tenant   Tenant @relation(fields: [tenantId], references: [id])
   tenantId String

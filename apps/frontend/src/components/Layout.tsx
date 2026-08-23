@@ -13,6 +13,7 @@ const navItems = [
   { to: '/app/inventory', label: 'Inventory', index: '04' },
   { to: '/app/bom', label: 'BOM', index: '05' },
   { to: '/app/mrp', label: 'MRP', index: '06' },
+  { to: '/app/anomalies', label: 'Anomalies', index: '07' },
 ];
 
 function resolveAvatar(url: string | null | undefined): string | null {
@@ -42,8 +43,8 @@ export function Layout() {
   return (
     <div className="min-h-screen bg-paper text-ink">
       <header className="sticky top-0 z-10 border-b border-line bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-10">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+          <div className="flex items-center gap-8">
             <div className="flex items-center gap-2.5">
               <img src={logo} alt="LoomStack" className="h-7 w-7" />
               <span className="font-display text-lg font-700 tracking-tight">LoomStack</span>
@@ -51,7 +52,7 @@ export function Layout() {
                 ERP
               </span>
             </div>
-            <nav className="flex gap-1">
+            <nav className="flex gap-0.5">
               {navItems.map((item) => {
                 const active =
                   item.to === '/app'
@@ -62,14 +63,13 @@ export function Layout() {
                     key={item.to}
                     to={item.to}
                     className={
-                      'group relative flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ' +
+                      'group relative flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ' +
                       (active ? 'text-ink' : 'text-muted hover:bg-line/50 hover:text-ink')
                     }
                   >
                     <span
                       className={
-                        'font-mono text-[10px] ' +
-                        (active ? 'text-signal' : 'text-muted/50')
+                        'font-mono text-[10px] ' + (active ? 'text-signal' : 'text-muted/50')
                       }
                     >
                       {item.index}
@@ -86,7 +86,7 @@ export function Layout() {
 
           <div className="flex items-center gap-2">
             <Link
-              to="/profile"
+              to="/app/profile"
               className="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
             >
               <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-line bg-navy-soft">
@@ -96,9 +96,7 @@ export function Layout() {
                   <span className="font-mono text-[10px] font-600 text-navy">{initials}</span>
                 )}
               </span>
-              <span className="hidden sm:inline">
-                {profile?.name || 'Profile'}
-              </span>
+              <span className="hidden lg:inline">{profile?.name || 'Profile'}</span>
             </Link>
             <button
               onClick={handleLogout}
@@ -109,7 +107,7 @@ export function Layout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-7xl px-6 py-10">
         <Outlet />
       </main>
       <CopilotPanel />
