@@ -1,7 +1,10 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuthStore } from '@/store/authStore';
+import { useProfile } from '@/hooks/useProfile';
 import logo from '../assets/logo.png';
 import CopilotPanel from './CopilotPanel';
+
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 const navItems = [
   { to: '/app', label: 'Dashboard', index: '01' },
@@ -12,15 +15,29 @@ const navItems = [
   { to: '/app/mrp', label: 'MRP', index: '06' },
 ];
 
+function resolveAvatar(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return url.startsWith('http') ? url : `${API_BASE}${url}`;
+}
+
 export function Layout() {
-  const { logout } = useAuth();
+  const logout = useAuthStore((s) => s.logout);
   const location = useLocation();
   const navigate = useNavigate();
+  const { data: profile } = useProfile();
 
   function handleLogout() {
     logout();
     navigate('/');
   }
+
+  const avatar = resolveAvatar(profile?.avatarUrl);
+  const initials = (profile?.name || profile?.email || '?')
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -66,12 +83,30 @@ export function Layout() {
               })}
             </nav>
           </div>
-          <button
-            onClick={handleLogout}
-            className="rounded-md px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
-          >
-            Log out
-          </button>
+
+          <div className="flex items-center gap-2">
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
+            >
+              <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-line bg-navy-soft">
+                {avatar ? (
+                  <img src={avatar} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="font-mono text-[10px] font-600 text-navy">{initials}</span>
+                )}
+              </span>
+              <span className="hidden sm:inline">
+                {profile?.name || 'Profile'}
+              </span>
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
+            >
+              Log out
+            </button>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-10">
