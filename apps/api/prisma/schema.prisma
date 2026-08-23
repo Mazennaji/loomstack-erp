@@ -72,3 +72,51 @@ model StockItem {
 
   @@unique([productId, warehouseId])
 }
+
+model Product {
+  id        String   @id @default(uuid())
+  sku       String
+  name      String
+  unitCost  Decimal  @default(0) @db.Decimal(12, 4)
+  createdAt DateTime @default(now())
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+
+  stockItems StockItem[]
+  bomVersions BomVersion[]
+
+  bomLines      BomLine[] @relation("ParentProduct")
+  usedInBomLines BomLine[] @relation("ComponentProduct")
+
+  @@unique([tenantId, sku])
+}
+
+model BomVersion {
+  id          String   @id @default(uuid())
+  productId   String
+  version     Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  product Product   @relation(fields: [productId], references: [id])
+  lines   BomLine[]
+
+  @@unique([productId, version])
+}
+
+model BomLine {
+  id          String  @id @default(uuid())
+  quantity    Decimal @db.Decimal(12, 4)
+
+  bomVersionId String
+  bomVersion   BomVersion @relation(fields: [bomVersionId], references: [id])
+
+  parentProductId String
+  parentProduct   Product @relation("ParentProduct", fields: [parentProductId], references: [id])
+
+  componentProductId String
+  componentProduct   Product @relation("ComponentProduct", fields: [componentProductId], references: [id])
+
+  @@unique([bomVersionId, componentProductId])
+}
