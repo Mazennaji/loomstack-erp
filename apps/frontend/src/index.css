@@ -46,3 +46,14 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

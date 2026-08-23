@@ -5,7 +5,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/auth/AuthContext';
 import { ProtectedRoute } from '@/auth/ProtectedRoute';
 import { Layout } from '@/components/Layout';
+import { Landing } from '@/pages/Landing';
 import { Login } from '@/pages/Login';
+import { Register } from '@/pages/Register';
 import { Dashboard } from '@/pages/Dashboard';
 import { Products } from '@/pages/Products';
 import { Mrp } from '@/pages/Mrp';
@@ -23,12 +25,14 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
-            <Route element={<ProtectedRoute />}>
+            <Route path="/register" element={<Register />} />
+            <Route path="/app" element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/mrp" element={<Mrp />} />
+                <Route index element={<Dashboard />} />
+                <Route path="products" element={<Products />} />
+                <Route path="mrp" element={<Mrp />} />
               </Route>
             </Route>
           </Routes>
