@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSalesOrderDto } from './dto/create-sales-order.dto';
 import { RunMrpDto } from './dto/run-mrp.dto';
@@ -197,6 +197,76 @@ export class MrpService {
     return this.prisma.mrpRun.findMany({
       where: { tenantId },
       orderBy: { runAt: 'desc' },
+    });
+  }
+
+  async applyRun(tenantId: string, runId: string) {
+    const run = await this.prisma.mrpRun.findFirst({
+      where: { id: runId, tenantId },
+      include: { suggestions: true },
+    });
+    if (!run) throw new NotFoundException('MRP run not found for this tenant');
+
+    if (run.status !== 'DRAFT') {
+      throw new ConflictException(
+        `Cannot apply a run with status ${run.status}; only DRAFT runs can be applied`,
+      );
+    }
+
+    if (run.suggestions.length === 0) {
+      throw new BadRequestException('Run has no suggestions to apply');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      for (const s of run.suggestions) {
+        const orderData = {
+          tenantId,
+          productId: s.productId,
+          quantity: s.quantity,
+          dueDate: s.dueDate,
+          mrpRunId: run.id,
+        };
+
+        if (s.type === 'PURCHASE') {
+          await tx.purchaseOrder.create({ data: orderData });
+        } else {
+          await tx.productionOrder.create({ data: orderData });
+        }
+      }
+
+      return tx.mrpRun.update({
+        where: { id: run.id },
+        data: { status: 'APPLIED' },
+        include: {
+          suggestions: { include: { product: true } },
+          purchaseOrders: { include: { product: true } },
+          productionOrders: { include: { product: true } },
+        },
+      });
+    });
+  }
+
+  async cancelRun(tenantId: string, runId: string) {
+    const run = await this.prisma.mrpRun.findFirst({
+      where: { id: runId, tenantId },
+    });
+    if (!run) throw new NotFoundException('MRP run not found for this tenant');
+
+    if (run.status !== 'APPLIED') {
+      throw new ConflictException(
+        `Cannot cancel a run with status ${run.status}; only APPLIED runs can be cancelled`,
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.purchaseOrder.deleteMany({ where: { mrpRunId: run.id, tenantId } });
+      await tx.productionOrder.deleteMany({ where: { mrpRunId: run.id, tenantId } });
+
+      return tx.mrpRun.update({
+        where: { id: run.id },
+        data: { status: 'DRAFT' },
+        include: { suggestions: { include: { product: true } } },
+      });
     });
   }
 }
