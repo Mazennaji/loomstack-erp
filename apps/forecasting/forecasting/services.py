@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 import pandas as pd
-from prophet import Prophet
+
 from .models import SalesOrderLine
+from .forecasters import SIMPLE_FORECASTERS
 
 
 def get_historical_demand(tenant_id: str, product_id: str) -> pd.DataFrame:
@@ -19,15 +22,11 @@ def get_historical_demand(tenant_id: str, product_id: str) -> pd.DataFrame:
     return df
 
 
-def forecast_demand(tenant_id: str, product_id: str, periods_weeks: int = 8):
-    df = get_historical_demand(tenant_id, product_id)
-
-    if df.empty or len(df) < 3:
-        return {
-            'status': 'insufficient_data',
-            'message': 'Not enough historical sales data to generate a forecast (minimum 3 data points required).',
-            'forecast': [],
-        }
+def _forecast_prophet(df, periods_weeks):
+    try:
+        from prophet import Prophet
+    except ImportError:
+        return None
 
     model = Prophet(
         yearly_seasonality=False,
@@ -38,10 +37,9 @@ def forecast_demand(tenant_id: str, product_id: str, periods_weeks: int = 8):
 
     future = model.make_future_dataframe(periods=periods_weeks, freq='W')
     forecast = model.predict(future)
-
     future_only = forecast[forecast['ds'] > df['ds'].max()]
 
-    result = [
+    return [
         {
             'date': row['ds'].strftime('%Y-%m-%d'),
             'predicted_demand': max(0, round(row['yhat'])),
@@ -51,8 +49,48 @@ def forecast_demand(tenant_id: str, product_id: str, periods_weeks: int = 8):
         for _, row in future_only.iterrows()
     ]
 
+
+def _forecast_simple(df, periods_weeks, method):
+    fn = SIMPLE_FORECASTERS[method]
+    y_values = [int(v) for v in df['y'].tolist()]
+    predicted = fn(y_values, periods_weeks)
+
+    last_date = df['ds'].max()
+    result = []
+    for k, qty in enumerate(predicted, start=1):
+        forecast_date = last_date + timedelta(weeks=k)
+        result.append({
+            'date': forecast_date.strftime('%Y-%m-%d'),
+            'predicted_demand': qty,
+            'lower_bound': qty,
+            'upper_bound': qty,
+        })
+    return result
+
+
+def forecast_demand(tenant_id: str, product_id: str, periods_weeks: int = 8, method: str = 'prophet'):
+    df = get_historical_demand(tenant_id, product_id)
+
+    if df.empty or len(df) < 3:
+        return {
+            'status': 'insufficient_data',
+            'message': 'Not enough historical sales data to generate a forecast (minimum 3 data points required).',
+            'forecast': [],
+        }
+
+    used_method = method
+
+    if method == 'prophet':
+        forecast = _forecast_prophet(df, periods_weeks)
+        if forecast is None:
+            used_method = 'moving_average'
+            forecast = _forecast_simple(df, periods_weeks, 'moving_average')
+    else:
+        forecast = _forecast_simple(df, periods_weeks, method)
+
     return {
         'status': 'ok',
         'product_id': product_id,
-        'forecast': result,
+        'method': used_method,
+        'forecast': forecast,
     }
