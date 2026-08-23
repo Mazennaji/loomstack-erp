@@ -15,6 +15,7 @@ def forecast_view(request):
         tenant_id=data['tenant_id'],
         product_id=data['product_id'],
         periods_weeks=data['periods_weeks'],
+        method=data['method'],
     )
 
     return Response(result, status=status.HTTP_200_OK)
