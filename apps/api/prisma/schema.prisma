@@ -16,6 +16,10 @@ model Tenant {
   users      User[]
   warehouses Warehouse[]
   products   Product[]
+
+  salesOrders    SalesOrder[]
+  mrpRuns        MrpRun[]
+  mrpSuggestions MrpSuggestion[]
 }
 
 model User {
@@ -62,6 +66,11 @@ model Product {
   usedInBomLines BomLine[]    @relation("ComponentProduct")
   bomVersions    BomVersion[]
 
+  leadTimeDays    Int  @default(0)
+  safetyStock     Int  @default(0)
+  salesOrderLines SalesOrderLine[]
+  mrpSuggestions  MrpSuggestion[]
+
   @@unique([tenantId, sku])
 }
 
@@ -106,4 +115,66 @@ model BomLine {
   componentProduct   Product @relation("ComponentProduct", fields: [componentProductId], references: [id])
 
   @@unique([bomVersionId, componentProductId])
+}
+
+enum MrpSuggestionType {
+  PURCHASE
+  PRODUCTION
+}
+
+enum MrpRunStatus {
+  DRAFT
+  APPLIED
+  CANCELLED
+}
+
+model SalesOrder {
+  id           String   @id @default(uuid())
+  customerName String
+  status       String   @default("OPEN")
+  createdAt    DateTime @default(now())
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+
+  lines SalesOrderLine[]
+}
+
+model SalesOrderLine {
+  id       String   @id @default(uuid())
+  quantity Int
+  dueDate  DateTime
+
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
+  salesOrderId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+}
+
+model MrpRun {
+  id     String       @id @default(uuid())
+  status MrpRunStatus @default(DRAFT)
+  runAt  DateTime     @default(now())
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+
+  suggestions MrpSuggestion[]
+}
+
+model MrpSuggestion {
+  id       String            @id @default(uuid())
+  type     MrpSuggestionType
+  quantity Int
+  dueDate  DateTime
+
+  mrpRun   MrpRun @relation(fields: [mrpRunId], references: [id], onDelete: Cascade)
+  mrpRunId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
 }
