@@ -4,8 +4,15 @@ import { api } from '@/lib/api';
 interface AuthState {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+}
+
+interface RegisterInput {
+  companyName: string;
+  email: string;
+  password: string;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -21,13 +28,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [token]);
 
+  function extractToken(data: Record<string, unknown>): string | null {
+    return (
+      (data.access_token as string) ??
+      (data.accessToken as string) ??
+      (data.token as string) ??
+      null
+    );
+  }
+
   async function login(email: string, password: string) {
     const res = await api.post('/auth/login', { email, password });
-    const newToken = res.data.access_token ?? res.data.accessToken ?? res.data.token;
-    if (!newToken) {
-      throw new Error('No token returned from login');
-    }
+    const newToken = extractToken(res.data);
+    if (!newToken) throw new Error('No token returned from login');
     setToken(newToken);
+  }
+
+  async function register(input: RegisterInput) {
+    const res = await api.post('/auth/register', {
+      companyName: input.companyName,
+      email: input.email,
+      password: input.password,
+    });
+    const newToken = extractToken(res.data);
+    if (newToken) {
+      setToken(newToken);
+    } else {
+      await login(input.email, input.password);
+    }
   }
 
   function logout() {
@@ -35,7 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider
+      value={{ token, login, register, logout, isAuthenticated: !!token }}
+    >
       {children}
     </AuthContext.Provider>
   );
