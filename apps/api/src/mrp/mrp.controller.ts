@@ -35,4 +35,14 @@ export class MrpController {
   getRun(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.mrpService.getRun(user.tenantId, id);
   }
+
+  @Post('runs/:id/apply')
+  applyRun(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.mrpService.applyRun(user.tenantId, id);
+  }
+
+  @Post('runs/:id/cancel')
+  cancelRun(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.mrpService.cancelRun(user.tenantId, id);
+  }
 }
