@@ -1,16 +1,25 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
 import logo from '../assets/logo.png';
 
 const navItems = [
-  { to: '/', label: 'Dashboard', index: '01' },
-  { to: '/products', label: 'Products', index: '02' },
-  { to: '/mrp', label: 'MRP', index: '03' },
+  { to: '/app', label: 'Dashboard', index: '01' },
+  { to: '/app/products', label: 'Products', index: '02' },
+  { to: '/app/warehouses', label: 'Warehouses', index: '03' },
+  { to: '/app/inventory', label: 'Inventory', index: '04' },
+  { to: '/app/bom', label: 'BOM', index: '05' },
+  { to: '/app/mrp', label: 'MRP', index: '06' },
 ];
 
 export function Layout() {
   const { logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/');
+  }
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -26,7 +35,10 @@ export function Layout() {
             </div>
             <nav className="flex gap-1">
               {navItems.map((item) => {
-                const active = location.pathname === item.to;
+                const active =
+                  item.to === '/app'
+                    ? location.pathname === '/app'
+                    : location.pathname === item.to;
                 return (
                   <Link
                     key={item.to}
@@ -54,7 +66,7 @@ export function Layout() {
             </nav>
           </div>
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="rounded-md px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
           >
             Log out
