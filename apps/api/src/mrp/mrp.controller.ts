@@ -74,4 +74,9 @@ export class MrpController {
   ) {
     return this.mrpService.completeProductionOrder(user.tenantId, id, dto);
   }
+
+    @Get('history/:productId')
+    monthlyHistory(@Param('productId') productId: string, @CurrentUser() user: JwtPayload) {
+    return this.mrpService.monthlyHistory(user.tenantId, productId);
+  }
 }
