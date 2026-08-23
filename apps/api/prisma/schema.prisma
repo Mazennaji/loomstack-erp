@@ -20,6 +20,9 @@ model Tenant {
   salesOrders    SalesOrder[]
   mrpRuns        MrpRun[]
   mrpSuggestions MrpSuggestion[]
+
+  purchaseOrders   PurchaseOrder[]
+  productionOrders ProductionOrder[]
 }
 
 model User {
@@ -70,6 +73,9 @@ model Product {
   safetyStock     Int  @default(0)
   salesOrderLines SalesOrderLine[]
   mrpSuggestions  MrpSuggestion[]
+
+  purchaseOrders   PurchaseOrder[]
+  productionOrders ProductionOrder[]
 
   @@unique([tenantId, sku])
 }
@@ -161,6 +167,8 @@ model MrpRun {
   tenantId String
 
   suggestions MrpSuggestion[]
+  purchaseOrders   PurchaseOrder[]
+  productionOrders ProductionOrder[]
 }
 
 model MrpSuggestion {
@@ -171,6 +179,47 @@ model MrpSuggestion {
 
   mrpRun   MrpRun @relation(fields: [mrpRunId], references: [id], onDelete: Cascade)
   mrpRunId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+}
+
+enum OrderStatus {
+  PLANNED
+  RELEASED
+  COMPLETED
+  CANCELLED
+}
+
+model PurchaseOrder {
+  id       String      @id @default(uuid())
+  quantity Int
+  dueDate  DateTime
+  status   OrderStatus @default(PLANNED)
+  createdAt DateTime   @default(now())
+
+  mrpRun   MrpRun? @relation(fields: [mrpRunId], references: [id], onDelete: SetNull)
+  mrpRunId String?
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId String
+}
+
+model ProductionOrder {
+  id       String      @id @default(uuid())
+  quantity Int
+  dueDate  DateTime
+  status   OrderStatus @default(PLANNED)
+  createdAt DateTime   @default(now())
+
+  mrpRun   MrpRun? @relation(fields: [mrpRunId], references: [id], onDelete: SetNull)
+  mrpRunId String?
 
   product   Product @relation(fields: [productId], references: [id])
   productId String
