@@ -12,6 +12,8 @@ import { BomModule } from './bom/bom.module';
 import { MrpModule } from './mrp/mrp.module';
 import { CopilotModule } from './copilot/copilot.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -20,6 +22,10 @@ import { RealtimeModule } from './realtime/realtime.module';
       connection: {
         url: process.env.REDIS_URL || 'redis://localhost:6379',
       },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
     }),
     PrismaModule,
     TenantsModule,
