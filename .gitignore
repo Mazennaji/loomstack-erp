@@ -1,0 +1,87 @@
+# ==============================
+# Environment & secrets
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# Node / NestJS / React (Vite)
+# ==============================
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.npm/
+.eslintcache
+.pnp.*
+.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite
+apps/frontend/dist/
+apps/frontend/.vite/
+
+# NestJS
+apps/api/dist/
+
+# ==============================
+# Python / Django
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+venv/
+env/
+.venv/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+staticfiles/
+media/
+
+# ==============================
+# Docker
+# ==============================
+*.pid
+
+# ==============================
+# Logs
+# ==============================
+logs/
+*.log
+
+# ==============================
+# OS files
+# ==============================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ==============================
+# Editor / IDE
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==============================
+# Testing / coverage
+# ==============================
+coverage/
+*.lcov
+
+# ==============================
+# Misc
+# ==============================
+*.tmp
+*.bak
