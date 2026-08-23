@@ -8,6 +8,14 @@ import { WarehousesModule } from './warehouses/warehouses.module';
 import { StockModule } from './stock/stock.module';
 
 @Module({
-  imports: [PrismaModule, TenantsModule, UsersModule, AuthModule, ProductsModule, WarehousesModule, StockModule],
+  imports: [
+    PrismaModule,
+    TenantsModule,
+    UsersModule,
+    AuthModule,
+    ProductsModule,
+    WarehousesModule,
+    StockModule,
+  ],
 })
 export class AppModule {}
