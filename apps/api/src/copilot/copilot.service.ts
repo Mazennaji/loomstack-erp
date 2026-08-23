@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import OpenAI from 'openai';
 import { PrismaService } from '../prisma/prisma.service';
 import { MrpService } from '../mrp/mrp.service';
@@ -7,13 +7,26 @@ import { copilotTools } from './copilot.tools';
 
 @Injectable()
 export class CopilotService {
-  private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  private client: OpenAI | null = null;
 
   constructor(
     private prisma: PrismaService,
     private mrpService: MrpService,
     private forecastingClient: ForecastingClientService,
   ) {}
+
+  private get openai(): OpenAI {
+    if (!this.client) {
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new ServiceUnavailableException(
+          'Copilot is not configured. Set OPENAI_API_KEY on the server.',
+        );
+      }
+      this.client = new OpenAI({ apiKey });
+    }
+    return this.client;
+  }
 
   private async executeTool(name: string, args: any, tenantId: string) {
     switch (name) {
