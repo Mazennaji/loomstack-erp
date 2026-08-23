@@ -1,4 +1,4 @@
-import { MrpSuggestion } from '../api/mrp';
+import type { MrpSuggestion } from '../api/mrp';
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString();

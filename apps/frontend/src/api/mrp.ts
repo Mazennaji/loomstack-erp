@@ -21,10 +21,14 @@ export interface SalesOrder {
 
 export interface MrpSuggestion {
   id: string;
-  type: "PURCHASE" | "PRODUCTION";
+  type: 'PURCHASE' | 'PRODUCTION';
   quantity: number;
   dueDate: string;
-  product: { id: string; sku: string; name: string };
+  product: {
+    id: string;
+    sku: string;
+    name: string;
+  };
 }
 
 export interface MrpRun {
