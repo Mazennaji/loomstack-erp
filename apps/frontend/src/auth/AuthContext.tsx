@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import { api } from '@/lib/api';
 
 interface AuthState {
@@ -17,30 +17,23 @@ interface RegisterInput {
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
+function extractToken(data: Record<string, unknown>): string | null {
+  return (
+    (data.access_token as string) ??
+    (data.accessToken as string) ??
+    (data.token as string) ??
+    null
+  );
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
-    }
-  }, [token]);
-
-  function extractToken(data: Record<string, unknown>): string | null {
-    return (
-      (data.access_token as string) ??
-      (data.accessToken as string) ??
-      (data.token as string) ??
-      null
-    );
-  }
 
   async function login(email: string, password: string) {
     const res = await api.post('/auth/login', { email, password });
     const newToken = extractToken(res.data);
     if (!newToken) throw new Error('No token returned from login');
+    localStorage.setItem('token', newToken);
     setToken(newToken);
   }
 
@@ -52,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const newToken = extractToken(res.data);
     if (newToken) {
+      localStorage.setItem('token', newToken);
       setToken(newToken);
     } else {
       await login(input.email, input.password);
@@ -59,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    localStorage.removeItem('token');
     setToken(null);
   }
 
