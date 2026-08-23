@@ -10,5 +10,5 @@ export class AdjustStockDto {
   warehouseId: string;
 
   @IsInt()
-  quantityChange: number; // positive to add stock, negative to remove
+  quantityChange: number;
 }
