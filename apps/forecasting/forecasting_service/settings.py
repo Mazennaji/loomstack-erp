@@ -14,13 +14,17 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.auth',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'forecasting',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'forecasting_service.urls'
 WSGI_APPLICATION = 'forecasting_service.wsgi.application'
@@ -33,9 +37,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'loomstack_dev_password'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5433'),
-        # 'OPTIONS': {
-        #     'options': '-c default_transaction_read_only=on'
-        # },
+        'OPTIONS': {
+            'options': '-c default_transaction_read_only=on'
+        },
     }
 }
 
