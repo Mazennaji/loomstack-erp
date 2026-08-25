@@ -15,6 +15,7 @@ import Inventory from '@/pages/Inventory';
 import Bom from '@/pages/Bom';
 import Mrp from '@/pages/Mrp';
 import Anomalies from '@/pages/Anomalies';
+import Machines from '@/pages/Machines';
 import Profile from '@/pages/Profile';
 import './index.css';
 
@@ -42,6 +43,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="bom" element={<Bom />} />
                 <Route path="mrp" element={<Mrp />} />
                 <Route path="anomalies" element={<Anomalies />} />
+                <Route path="machines" element={<Machines />} />
                 <Route path="profile" element={<Profile />} />
               </Route>
             </Route>

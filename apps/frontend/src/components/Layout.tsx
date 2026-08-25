@@ -6,14 +6,28 @@ import CopilotPanel from './CopilotPanel';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
-const navItems = [
-  { to: '/app', label: 'Dashboard', index: '01' },
-  { to: '/app/products', label: 'Products', index: '02' },
-  { to: '/app/warehouses', label: 'Warehouses', index: '03' },
-  { to: '/app/inventory', label: 'Inventory', index: '04' },
-  { to: '/app/bom', label: 'BOM', index: '05' },
-  { to: '/app/mrp', label: 'MRP', index: '06' },
-  { to: '/app/anomalies', label: 'Anomalies', index: '07' },
+const navSections = [
+  {
+    heading: 'Overview',
+    items: [{ to: '/app', label: 'Dashboard', index: '01' }],
+  },
+  {
+    heading: 'Catalog',
+    items: [
+      { to: '/app/products', label: 'Products', index: '02' },
+      { to: '/app/warehouses', label: 'Warehouses', index: '03' },
+      { to: '/app/inventory', label: 'Inventory', index: '04' },
+      { to: '/app/bom', label: 'BOM', index: '05' },
+    ],
+  },
+  {
+    heading: 'Planning',
+    items: [
+      { to: '/app/mrp', label: 'MRP', index: '06' },
+      { to: '/app/anomalies', label: 'Anomalies', index: '07' },
+      { to: '/app/machines', label: 'Machines', index: '08' },
+    ],
+  },
 ];
 
 function resolveAvatar(url: string | null | undefined): string | null {
@@ -40,33 +54,43 @@ export function Layout() {
     .join('')
     .toUpperCase();
 
+  function isActive(to: string) {
+    return to === '/app' ? location.pathname === '/app' : location.pathname === to;
+  }
+
   return (
-    <div className="min-h-screen bg-paper text-ink">
-      <header className="sticky top-0 z-10 border-b border-line bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2.5">
-              <img src={logo} alt="LoomStack" className="h-7 w-7" />
-              <span className="font-display text-lg font-700 tracking-tight">LoomStack</span>
-              <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted">
-                ERP
-              </span>
-            </div>
-            <nav className="flex gap-0.5">
-              {navItems.map((item) => {
-                const active =
-                  item.to === '/app'
-                    ? location.pathname === '/app'
-                    : location.pathname === item.to;
+    <div className="flex min-h-screen bg-paper text-ink">
+      <aside className="sticky top-0 flex h-screen w-60 flex-col border-r border-line bg-surface">
+        <div className="flex items-center gap-2.5 px-5 py-4">
+          <img src={logo} alt="LoomStack" className="h-7 w-7" />
+          <span className="font-display text-lg font-700 tracking-tight">LoomStack</span>
+          <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted">
+            ERP
+          </span>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto px-3 py-2">
+          {navSections.map((section) => (
+            <div key={section.heading} className="mb-4">
+              <div className="px-2 pb-1.5 font-mono text-[10px] font-medium uppercase tracking-widest text-muted/60">
+                {section.heading}
+              </div>
+              {section.items.map((item) => {
+                const active = isActive(item.to);
                 return (
                   <Link
                     key={item.to}
                     to={item.to}
                     className={
-                      'group relative flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ' +
-                      (active ? 'text-ink' : 'text-muted hover:bg-line/50 hover:text-ink')
+                      'relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ' +
+                      (active
+                        ? 'bg-navy-soft text-navy'
+                        : 'text-muted hover:bg-line/50 hover:text-ink')
                     }
                   >
+                    {active && (
+                      <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-signal" />
+                    )}
                     <span
                       className={
                         'font-mono text-[10px] ' + (active ? 'text-signal' : 'text-muted/50')
@@ -75,41 +99,41 @@ export function Layout() {
                       {item.index}
                     </span>
                     {item.label}
-                    {active && (
-                      <span className="absolute inset-x-2 -bottom-[13px] h-0.5 bg-signal" />
-                    )}
                   </Link>
                 );
               })}
-            </nav>
-          </div>
+            </div>
+          ))}
+        </nav>
 
-          <div className="flex items-center gap-2">
-            <Link
-              to="/app/profile"
-              className="flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
-            >
-              <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-line bg-navy-soft">
-                {avatar ? (
-                  <img src={avatar} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="font-mono text-[10px] font-600 text-navy">{initials}</span>
-                )}
-              </span>
-              <span className="hidden lg:inline">{profile?.name || 'Profile'}</span>
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
-            >
-              Log out
-            </button>
-          </div>
+        <div className="border-t border-line p-3">
+          <Link
+            to="/app/profile"
+            className="mb-1 flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
+          >
+            <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-line bg-navy-soft">
+              {avatar ? (
+                <img src={avatar} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-mono text-[10px] font-600 text-navy">{initials}</span>
+              )}
+            </span>
+            <span className="truncate">{profile?.name || 'Profile'}</span>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
+          >
+            Log out
+          </button>
         </div>
-      </header>
-      <main className="mx-auto max-w-7xl px-6 py-10">
-        <Outlet />
-      </main>
+      </aside>
+
+      <div className="flex-1">
+        <main className="mx-auto max-w-6xl px-8 py-10">
+          <Outlet />
+        </main>
+      </div>
       <CopilotPanel />
     </div>
   );
