@@ -94,5 +94,13 @@ def main():
     print('\nDone. Machines have usage + maintenance history.')
 
 
+def log_usage(token, machine_id, d, hours, cycles):
+    r = requests.post(
+        f'{API_BASE}/machines/usage',
+        headers={'Authorization': f'Bearer {token}'},
+        json={'machineId': machine_id, 'date': d.isoformat(), 'hoursRun': hours, 'cycles': cycles},
+    )
+    r.raise_for_status()
+
 if __name__ == '__main__':
     main()
