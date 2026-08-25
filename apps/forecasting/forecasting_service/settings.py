@@ -33,9 +33,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'loomstack_dev_password'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5433'),
-        'OPTIONS': {
-            'options': '-c default_transaction_read_only=on'
-        },
+        # 'OPTIONS': {
+        #     'options': '-c default_transaction_read_only=on'
+        # },
     }
 }
 
