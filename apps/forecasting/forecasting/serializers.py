@@ -13,3 +13,9 @@ class ForecastRequestSerializer(serializers.Serializer):
 class AnomalyRequestSerializer(serializers.Serializer):
     tenant_id = serializers.CharField()
     product_id = serializers.CharField(required=False, allow_blank=True)
+    
+    
+
+class MaintenanceRequestSerializer(serializers.Serializer):
+    tenant_id = serializers.CharField()
+    machine_id = serializers.CharField(required=False, allow_blank=True)
