@@ -27,33 +27,45 @@ def login():
     return d.get('access_token') or d.get('accessToken') or d.get('token')
 
 
+def auth_headers(token):
+    return {'Authorization': f'Bearer {token}'}
+
+
 def create_machine(token, name, code, interval):
     r = requests.post(
         f'{API_BASE}/machines',
-        headers={'Authorization': f'Bearer {token}'},
+        headers=auth_headers(token),
         json={'name': name, 'code': code, 'maintenanceIntervalHours': interval},
     )
-    if r.status_code >= 400:
-        existing = requests.get(f'{API_BASE}/machines', headers={'Authorization': f'Bearer {token}'}).json()
-        for m in existing:
-            if m['code'] == code:
+    if r.status_code == 404:
+        raise SystemExit(
+            f"The API has no /machines endpoint (404). "
+            f"This seed script requires a machines module on the NestJS API "
+            f"at {API_BASE} that isn't implemented yet."
+        )
+    if r.status_code == 409:  # already exists, look it up
+        existing = requests.get(f'{API_BASE}/machines', headers=auth_headers(token)).json()
+        items = existing.get('data', existing) if isinstance(existing, dict) else existing
+        for m in items:
+            if m.get('code') == code:
                 return m['id']
-        raise SystemExit(f'create machine failed: {r.status_code} {r.text}')
+    r.raise_for_status()
     return r.json()['id']
 
 
 def log_usage(token, machine_id, d, hours, cycles):
-    requests.post(
+    r = requests.post(
         f'{API_BASE}/machines/usage',
-        headers={'Authorization': f'Bearer {token}'},
+        headers=auth_headers(token),
         json={'machineId': machine_id, 'date': d.isoformat(), 'hoursRun': hours, 'cycles': cycles},
     )
+    r.raise_for_status()
 
 
 def log_maintenance(token, machine_id, d, hours_at_service):
-    requests.post(
+    r = requests.post(
         f'{API_BASE}/machines/maintenance',
-        headers={'Authorization': f'Bearer {token}'},
+        headers=auth_headers(token),
         json={
             'machineId': machine_id,
             'type': 'PREVENTIVE',
@@ -61,6 +73,7 @@ def log_maintenance(token, machine_id, d, hours_at_service):
             'hoursAtService': hours_at_service,
         },
     )
+    r.raise_for_status()
 
 
 def main():
@@ -78,8 +91,7 @@ def main():
 
         for day in range(DAYS):
             d = start + timedelta(days=day)
-            weekday = d.weekday()
-            factor = 0.3 if weekday >= 5 else 1.0
+            factor = 0.3 if d.weekday() >= 5 else 1.0
             hours = max(0, random.gauss(avg_daily * factor, 2))
             cycles = int(hours * random.uniform(8, 15))
             cumulative += hours
@@ -93,14 +105,6 @@ def main():
 
     print('\nDone. Machines have usage + maintenance history.')
 
-
-def log_usage(token, machine_id, d, hours, cycles):
-    r = requests.post(
-        f'{API_BASE}/machines/usage',
-        headers={'Authorization': f'Bearer {token}'},
-        json={'machineId': machine_id, 'date': d.isoformat(), 'hoursRun': hours, 'cycles': cycles},
-    )
-    r.raise_for_status()
 
 if __name__ == '__main__':
     main()

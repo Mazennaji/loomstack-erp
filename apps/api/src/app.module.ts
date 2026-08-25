@@ -12,6 +12,7 @@ import { BomModule } from './bom/bom.module';
 import { MrpModule } from './mrp/mrp.module';
 import { CopilotModule } from './copilot/copilot.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { MachinesModule } from './machines/machines.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -38,6 +39,7 @@ import { join } from 'path';
     MrpModule,
     CopilotModule,
     RealtimeModule,
+    MachinesModule,
   ],
 })
 export class AppModule {}
