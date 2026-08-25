@@ -5,6 +5,8 @@ from .serializers import ForecastRequestSerializer
 from .services import forecast_demand
 from .ml.anomaly import detect_demand_anomalies, detect_all_products
 from .serializers import AnomalyRequestSerializer
+from .ml.maintenance import predict_machine, predict_all
+from .serializers import MaintenanceRequestSerializer
 
 
 @api_view(['POST'])
@@ -33,5 +35,20 @@ def anomaly_view(request):
         result = detect_demand_anomalies(data['tenant_id'], data['product_id'])
     else:
         result = detect_all_products(data['tenant_id'])
+
+    return Response(result, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST'])
+def maintenance_view(request):
+    serializer = MaintenanceRequestSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
+
+    if data.get('machine_id'):
+        result = predict_machine(data['tenant_id'], data['machine_id'])
+    else:
+        result = predict_all(data['tenant_id'])
 
     return Response(result, status=status.HTTP_200_OK)
