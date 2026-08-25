@@ -1,10 +1,12 @@
+import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useProfile } from '@/hooks/useProfile';
 import logo from '../assets/logo.png';
 import CopilotPanel from './CopilotPanel';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = (import.meta as ImportMeta & { env: { VITE_API_BASE?: string } }).env
+  .VITE_API_BASE ?? '';
 
 const navSections = [
   {
@@ -40,6 +42,11 @@ export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: profile } = useProfile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   function handleLogout() {
     logout();
@@ -60,13 +67,38 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen bg-paper text-ink">
-      <aside className="sticky top-0 flex h-screen w-60 flex-col border-r border-line bg-surface">
-        <div className="flex items-center gap-2.5 px-5 py-4">
-          <img src={logo} alt="LoomStack" className="h-7 w-7" />
-          <span className="font-display text-lg font-700 tracking-tight">LoomStack</span>
-          <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted">
-            ERP
-          </span>
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-navy/40 backdrop-blur-sm lg:hidden"
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={
+          'fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-line bg-surface ' +
+          'transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ' +
+          (sidebarOpen ? 'translate-x-0' : '-translate-x-full')
+        }
+      >
+        <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <img src={logo} alt="LoomStack" className="h-7 w-7" />
+            <span className="font-display text-lg font-700 tracking-tight">LoomStack</span>
+            <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted">
+              ERP
+            </span>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-line/50 hover:text-ink lg:hidden"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-2">
@@ -106,10 +138,10 @@ export function Layout() {
           ))}
         </nav>
 
-                <div className="border-t border-line p-3">
+        <div className="border-t border-line p-3">
           <Link
             to="/app/profile"
-            className="group flex items-center gap-3 rounded-lg border border-line bg-paper/50 p-2.5 transition-colors hover:border-signal/40 hover:bg-paper"
+            className="group mb-1 flex items-center gap-3 rounded-lg border border-line bg-paper/50 p-2.5 transition-colors hover:border-signal/40 hover:bg-paper"
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy">
               {avatar ? (
@@ -137,10 +169,9 @@ export function Layout() {
               <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </Link>
-
           <button
             onClick={handleLogout}
-            className="mt-2 flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-draft-soft hover:text-draft"
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-draft-soft hover:text-draft"
           >
             <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path
@@ -156,11 +187,28 @@ export function Layout() {
         </div>
       </aside>
 
-      <div className="flex-1">
-        <main className="mx-auto max-w-6xl px-8 py-10">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-surface/90 px-4 py-3 backdrop-blur lg:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+            className="flex h-9 w-9 items-center justify-center rounded-md text-ink transition-colors hover:bg-line/50"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+            </svg>
+          </button>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="LoomStack" className="h-6 w-6" />
+            <span className="font-display text-base font-700 tracking-tight">LoomStack</span>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
           <Outlet />
         </main>
       </div>
+
       <CopilotPanel />
     </div>
   );
