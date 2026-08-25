@@ -106,24 +106,51 @@ export function Layout() {
           ))}
         </nav>
 
-        <div className="border-t border-line p-3">
+                <div className="border-t border-line p-3">
           <Link
             to="/app/profile"
-            className="mb-1 flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
+            className="group flex items-center gap-3 rounded-lg border border-line bg-paper/50 p-2.5 transition-colors hover:border-signal/40 hover:bg-paper"
           >
-            <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-line bg-navy-soft">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy">
               {avatar ? (
                 <img src={avatar} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="font-mono text-[10px] font-600 text-navy">{initials}</span>
+                <span className="font-mono text-[12px] font-600 text-surface">{initials}</span>
               )}
             </span>
-            <span className="truncate">{profile?.name || 'Profile'}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-600 text-ink">
+                {profile?.name || 'Your profile'}
+              </span>
+              <span className="block truncate font-mono text-[11px] text-muted">
+                {profile?.email || 'View account'}
+              </span>
+            </span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              className="shrink-0 text-muted transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            >
+              <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </Link>
+
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-line/50 hover:text-ink"
+            className="mt-2 flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-draft-soft hover:text-draft"
           >
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M6 14H3.5A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H6 M10.5 11l3-3-3-3 M13 8H6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
             Log out
           </button>
         </div>
