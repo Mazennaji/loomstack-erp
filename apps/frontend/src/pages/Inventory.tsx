@@ -37,7 +37,7 @@ export default function Inventory() {
 
   return (
     <div>
-      <div className="mb-8 flex items-end justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex items-baseline gap-3">
             <span className="font-mono text-xs text-signal">04</span>
@@ -71,55 +71,101 @@ export default function Inventory() {
         {stockLoading ? (
           <p className="px-5 py-10 text-center text-sm text-muted">Loading stock…</p>
         ) : stockLevels && stockLevels.length > 0 ? (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-line text-left">
-                <th className="px-5 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-                  SKU
-                </th>
-                <th className="py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-                  Product
-                </th>
-                <th className="py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-                  Warehouse
-                </th>
-                <th className="py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-                  Qty
-                </th>
-                <th className="py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-                  Reserved
-                </th>
-                <th className="px-5 py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
-                  Available
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            <div className="hidden overflow-x-auto sm:block">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead>
+                  <tr className="border-b border-line text-left">
+                    <th className="px-5 py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
+                      SKU
+                    </th>
+                    <th className="py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
+                      Product
+                    </th>
+                    <th className="py-2.5 font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
+                      Warehouse
+                    </th>
+                    <th className="py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
+                      Qty
+                    </th>
+                    <th className="py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
+                      Reserved
+                    </th>
+                    <th className="px-5 py-2.5 text-right font-mono text-[10px] font-medium uppercase tracking-wider text-muted">
+                      Available
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stockLevels.map((s) => {
+                    const available = s.quantity - s.reserved;
+                    return (
+                      <tr
+                        key={s.id}
+                        className="border-b border-line last:border-0 transition-colors hover:bg-paper"
+                      >
+                        <td className="px-5 py-3 font-mono text-[13px] text-navy">{s.product.sku}</td>
+                        <td className="py-3 font-medium">{s.product.name}</td>
+                        <td className="py-3 text-muted">{s.warehouse.name}</td>
+                        <td className="py-3 text-right font-mono">{s.quantity}</td>
+                        <td className="py-3 text-right font-mono text-muted">{s.reserved}</td>
+                        <td
+                          className={
+                            'px-5 py-3 text-right font-mono font-600 ' +
+                            (available <= 0 ? 'text-draft' : 'text-done')
+                          }
+                        >
+                          {available}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <ul className="divide-y divide-line sm:hidden">
               {stockLevels.map((s) => {
                 const available = s.quantity - s.reserved;
                 return (
-                  <tr
-                    key={s.id}
-                    className="border-b border-line last:border-0 transition-colors hover:bg-paper"
-                  >
-                    <td className="px-5 py-3 font-mono text-[13px] text-navy">{s.product.sku}</td>
-                    <td className="py-3 font-medium">{s.product.name}</td>
-                    <td className="py-3 text-muted">{s.warehouse.name}</td>
-                    <td className="py-3 text-right font-mono">{s.quantity}</td>
-                    <td className="py-3 text-right font-mono text-muted">{s.reserved}</td>
-                    <td
-                      className={
-                        'px-5 py-3 text-right font-mono font-600 ' +
-                        (available <= 0 ? 'text-draft' : 'text-done')
-                      }
-                    >
-                      {available}
-                    </td>
-                  </tr>
+                  <li key={s.id} className="px-5 py-4">
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <div className="text-sm font-600">{s.product.name}</div>
+                        <div className="mt-0.5 font-mono text-[11px] text-navy">{s.product.sku}</div>
+                        <div className="mt-0.5 font-mono text-[11px] text-muted">
+                          {s.warehouse.name}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div
+                          className={
+                            'font-mono text-lg font-600 ' +
+                            (available <= 0 ? 'text-draft' : 'text-done')
+                          }
+                        >
+                          {available}
+                        </div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-muted">
+                          available
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex gap-4 font-mono text-[11px] text-muted">
+                      <span>
+                        <span className="text-muted/60">qty </span>
+                        <span className="text-ink">{s.quantity}</span>
+                      </span>
+                      <span>
+                        <span className="text-muted/60">reserved </span>
+                        <span className="text-ink">{s.reserved}</span>
+                      </span>
+                    </div>
+                  </li>
                 );
               })}
-            </tbody>
-          </table>
+            </ul>
+          </>
         ) : (
           <div className="px-5 py-12 text-center">
             <p className="text-sm text-muted">
